@@ -84,7 +84,7 @@ async def echo_json_data(data: dict = Body(...)):
     if "options" in field.keys():
       print(field)
       print(field["value"])
-      if field["value"] is None:
+      if field["value"] is None or len(field["value"]) == 0:
         value = -1
       else:
         valueKey = field["value"][0]
