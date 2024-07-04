@@ -55,9 +55,9 @@ async def echo_json_data(data: dict = Body(...)):
   This route handler receives a JSON payload and returns it as a string.
   """
   # Convert dictionary back to JSON string (optional)
-  print(data)
-  print(type(data))
-  print(data.keys())
+  # print(data)
+  # print(type(data))
+  # print(data.keys())
   fieldsLst = data["data"]["fields"]
   inputDataJSON = {
     0:"isEnroll",
@@ -82,8 +82,8 @@ async def echo_json_data(data: dict = Body(...)):
   for field in fieldsLst[1:]:
     value = ""
     if "options" in field.keys():
-      print(field)
-      print(field["value"])
+      # print(field)
+      # print(field["value"])
       if field["value"] is None or len(field["value"]) == 0:
         value = -1
       else:
@@ -113,9 +113,9 @@ async def echo_json_data(data: dict = Body(...)):
 
   json_string = json.dumps(data)
 
-  print(json_string)
-  print("------------> TRANSFORMED")
-  print(finalInputData)
+  # print(json_string)
+  # print("------------> TRANSFORMED")
+  # print(finalInputData)
 
   call_internalgemini(
     isEnroll=finalInputData["isEnroll"],
