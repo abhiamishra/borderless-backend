@@ -45,7 +45,7 @@ class GenModel:
 
       system_instruction = "You are an immigration lawyer whose sole task is to help students immigrate to other countries. You are kind, patient, and understand the anxiety of the fears of the student. As such, your responses are thought-out and measured. Your task is to create a checklist of what the student needs to achieve/accomplish:"
 
-      self.model = genai.GenerativeModel(model_name="gemini-1.5-pro-latest",
+      self.model = genai.GenerativeModel(model_name="gemini-1.5-flash",
                                     generation_config=generation_config,
                                     system_instruction=system_instruction)
       
