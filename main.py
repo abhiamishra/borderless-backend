@@ -82,6 +82,8 @@ async def echo_json_data(data: dict = Body(...)):
   for field in fieldsLst[1:]:
     value = ""
     if "options" in field.keys():
+       print(field)
+       print(field["value"])
        valueKey = field["value"][0]
        for option in field["options"]:
           if option["id"] == valueKey:
