@@ -8,6 +8,8 @@ from cachetools import TTLCache
 import os
 from dotenv import load_dotenv
 
+from preprocess_func import preprocess
+
 # Load .env file
 load_dotenv()
 import google.generativeai as genai
@@ -54,65 +56,8 @@ async def echo_json_data(data: dict = Body(...)):
   """
   This route handler receives a JSON payload and returns it as a string.
   """
-  # Convert dictionary back to JSON string (optional)
-  # print(data)
-  # print(type(data))
-  # print(data.keys())
-  fieldsLst = data["data"]["fields"]
-  inputDataJSON = {
-    0:"isEnroll",
-    1:"school",
-    2:"major",
-    3:"degreeLevel",
-    4:"startDate",
-    5:"isenrollAlt",
-    6:"nameAlt",
-    7:"isfullTime",
-    8:"englishLevel",
-    9:"isTOEFL",
-    10:"TOEFLScore",
-    11:"isEnrollEnglishCourse",
-    12:"isResidence",
-    13:"isFamily",
-    14:"isEmployed",
-    15:"hasAssets",
-    16:"isReturn"}
-
-  inputValueLst = []
-  for field in fieldsLst[1:]:
-    value = ""
-    if "options" in field.keys():
-      # print(field)
-      # print(field["value"])
-      if field["value"] is None or len(field["value"]) == 0:
-        value = -1
-      else:
-        valueKey = field["value"][0]
-        for option in field["options"]:
-          if option["id"] == valueKey:
-            value = option["text"]
-    elif field["value"] is not None:
-       value = field["value"]
-       if value == 'Yes':
-          value = True
-       elif value == 'No':
-          value = False
-    else:
-       value = -1
-    
-    inputValueLst.append(value)
-
-  finalInputData = {}
-
-  for idx, val in enumerate(inputValueLst):
-    key = inputDataJSON[idx]
-    if val == -1:
-       finalInputData[key] = None
-    else:
-        finalInputData[key] = val
-
-  json_string = json.dumps(data)
-
+  finalInputData = preprocess(data)
+  # json_string = json.dumps(data)
   # print(json_string)
   # print("------------> TRANSFORMED")
   # print(finalInputData)
