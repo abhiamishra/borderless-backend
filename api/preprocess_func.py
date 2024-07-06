@@ -49,7 +49,7 @@ def preprocess(data: dict = Body(...)):
     else:
        value = None
 
-    key = inputDataJSON[idx-1]
+    key = inputDataJSON[idx]
     finalInputData[key] = value
 
   return finalInputData
