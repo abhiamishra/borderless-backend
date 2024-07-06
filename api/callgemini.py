@@ -1,48 +1,16 @@
+from cachetools import TTLCache
 from fastapi import APIRouter, Body, Depends
-from app.api.preprocess_func import preprocess
-from app.gemini import GenModel
-from db_utils import get_connection
+from gemini import GenModel
 import json
+from db_utils import get_connection
 
 model = GenModel()
 router = APIRouter()
 conn = get_connection()
 cursor = conn.cursor()
 
-@router.post("/checklist")
-async def checklist(data: dict = Body(...), ):
-  """
-  This route handler receives a JSON payload and returns it as a string.
-  """
-  finalInputData = preprocess(data)
-  # json_string = json.dumps(data)
-  # print(json_string)
-  # print("------------> TRANSFORMED")
-  # print(finalInputData)
-  output = call_internalgemini(
-    isEnroll=finalInputData["isEnroll"],
-    school=finalInputData["school"],
-    major = finalInputData["major"],
-    degreeLevel= finalInputData["degreeLevel"],
-    startDate = finalInputData["startDate"],
-    isenrollAlt=finalInputData["isenrollAlt"],
-    nameAlt = finalInputData["nameAlt"],
-    isfullTime = finalInputData["isfullTime"],
-    englishLevel = finalInputData["englishLevel"],
-    isTOEFL = finalInputData["isTOEFL"],
-    TOEFLScore = finalInputData["TOEFLScore"],
-    isEnrollEnglishCourse = finalInputData["isEnrollEnglishCourse"],
-    isResidence = finalInputData["isResidence"],
-    isFamily = finalInputData["isFamily"],
-    isEmployed = finalInputData["isEmployed"],
-    hasAssets = finalInputData["hasAssets"],
-    isReturn = finalInputData["isReturn"]
-  )
-
-  return output
-
-  
-def call_internalgemini(isEnroll: bool = True,
+@router.post("/gemini")
+async def callgemini(isEnroll: bool = True,
                      school: str = None,
                      major: str = None,
                      degreeLevel: str = None,
@@ -84,7 +52,6 @@ def call_internalgemini(isEnroll: bool = True,
     data_json = json.dumps(og_checklist)
     cursor.execute(insert_stmt, (data_json, ))
     conn.commit()
-    conn.close()
 
     # cache = await get_cache()
     # cache["calculated_data"] = og_checklist

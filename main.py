@@ -4,9 +4,9 @@ from fastapi import FastAPI, Body, HTTPException
 from fastapi.responses import JSONResponse
 import sqlite3
 
-from app.api import callgemini
-from app.api import getdata
-from app.api import checklist
+from api import callgemini
+from api import getdata
+from api import checklist
 
 
 conn = sqlite3.connect("checklist.db")
