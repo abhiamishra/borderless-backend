@@ -11,14 +11,6 @@
         "src": "/(.*)",
         "dest": "main.py"
       }
-    ],
-    "functions": {
-        "gemini.py": {
-            "maxDuration": 60
-        },
-        "main.py": {
-            "maxDuration": 60
-        }
-    }
-  }
+    ]
+}
 
