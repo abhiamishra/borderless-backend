@@ -2,3 +2,6 @@
 *.ipynb
 
 bvenv/
+
+firebase.json
+db_utils.py

@@ -8,16 +8,12 @@ from api import callgemini
 from api import getdata
 from api import checklist
 
+import firebase_admin
+from firebase_admin import credentials, initialize_app, firestore
+cred = credentials.Certificate("firebase.json")  # Replace with your path
+initialize_app(cred)
 
-conn = sqlite3.connect("checklist.db")
-cursor = conn.cursor()
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS checklist_table (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        value TEXT NOT NULL CHECK(json_valid(value))
-    );
-''')
-conn.commit()
+db = firestore.client()
 
 app = FastAPI()
 origins = ["*"]
