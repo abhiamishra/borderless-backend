@@ -4,7 +4,7 @@ from firebase_admin import firestore
 import time
 
 # Replace these placeholders with your actual credentials
-cred = credentials.Certificate('borderless-7aa31-firebase-adminsdk-1n51p-b1afa91697.json')
+cred = credentials.Certificate('.json')
 firebase_admin.initialize_app(cred)
 
 db = firestore.client()
