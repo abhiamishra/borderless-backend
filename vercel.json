@@ -11,5 +11,10 @@
       "src": "/(.*)",
       "dest": "main.py"
     }
-  ]
+  ],
+  "functions": {
+    "./api/checklist.py": {
+      "maxDuration": 30
+    }
+  }
 }
