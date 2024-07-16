@@ -1,9 +1,12 @@
 from typing import Optional
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter, Body, Depends, HTTPException
 from api.preprocess_func import preprocess
 from gemini import GenModel
 from pydantic import BaseModel
 from firebase_admin import firestore
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from firebase_admin import auth
+
 # from db_utils import get_connection
 import json
 
@@ -25,26 +28,66 @@ class ChecklistItem(BaseModel):
     isEmployed: bool = True
     hasAssets: bool = True
     isReturn: bool = True
-
+    
 model = GenModel()
 router = APIRouter()
 # conn = get_connection()
 # cursor = conn.cursor()
 
+router = APIRouter()
+
+security = HTTPBearer()
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    try:
+        decoded_token = auth.verify_id_token(token)
+        return decoded_token
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+    
+
 # Dependency to get the Firestore client
 def get_db():
     return firestore.client()
 
+@router.post("/insert-user")
+async def insert_user(data: dict = Body(...), 
+                    db: firestore.Client = Depends(get_db),
+                    current_user: dict = Depends(get_current_user)):
+    user_id =  current_user["uid"]
+    email = current_user["email"]
+    print(email)
+
+    collection_ref =  db.collection("checklist-test")
+
+    query = collection_ref.where("email", "==",  email).limit(1)
+    print(query.get())
+    query_snapshot = query.get()
+
+    if len(query_snapshot) == 0:
+        doc_ref = collection_ref.document()
+        checklist_data = {"email":email}
+        checklist_data["createdAt"] = firestore.SERVER_TIMESTAMP
+        doc_ref.set(checklist_data)
+        print(f"added with id: {doc_ref.id}")
+        print("done!")
+        return {"message": "Users added successfully"}
+    else:
+        print("alr added lol!")
+        return {"message": "Users alr existed successfully"} 
+
 @router.post("/checklist")
-async def checklist(data: dict = Body(...), db: firestore.Client = Depends(get_db)):
+def checklist(data: dict = Body(...), 
+                    db: firestore.Client = Depends(get_db)):
   """
   This route handler receives a JSON payload and returns it as a string.
   """
   finalInputData = preprocess(data)
   # json_string = json.dumps(data)
-  # print(json_string)
-  # print("------------> TRANSFORMED")
-  # print(finalInputData)
+  print(data)
+  print("------------> TRANSFORMED")
+  print(finalInputData)
   output = call_internalgemini(
       db,
     isEnroll=finalInputData["isEnroll"],
@@ -109,19 +152,28 @@ def call_internalgemini(
         isReturn
     )
     collection_ref = db.collection("checklist-test")
-    # data_list = json.loads(og_checklist)
-    # print(type(og_checklist))
-    # for item in og_checklist:
-        # print(item)
-        # print(type(item))
-        # item = json.loads(item)
-        # print(type(item))
-    doc_ref = collection_ref.document()
-    checklist_data = {"checklist": og_checklist}
-    checklist_data["createdAt"] = firestore.SERVER_TIMESTAMP
     
-    doc_ref.set(checklist_data)
-    print(f"added with id: {doc_ref.id}")
+    query = collection_ref.order_by("createdAt", direction=firestore.Query.DESCENDING).limit(1)
+    query_snapshot = query.get()
+
+    if len(query_snapshot) == 0:
+      print("No documents found!")
+      return False
+    last_doc = query_snapshot[0]
+    last_doc_ref = collection_ref.document(last_doc.id)
+    
+    # last_doc = last_doc.to_dict()
+
+    last_doc_ref.update({"checklist": og_checklist})
+    last_doc_ref.update({"createdAt": firestore.SERVER_TIMESTAMP})
+
+
+
+    # doc_ref = collection_ref.document()
+    # checklist_data = {"email":email, "checklist": og_checklist}
+    # checklist_data["createdAt"] = firestore.SERVER_TIMESTAMP
+    
+    # doc_ref.set(checklist_data)
     print("done!")
     return {"message": "Document added successfully"}
     # insert_stmt = "INSERT INTO checklist_table (value) VALUES (?)"
