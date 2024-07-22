@@ -3,6 +3,8 @@
 
 bvenv/
 
+__pycache__/
+
 firebase.json
 
 encoded_key.txt

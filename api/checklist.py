@@ -8,7 +8,6 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from firebase_admin import auth
 
 # from db_utils import get_connection
-import json
 
 class ChecklistItem(BaseModel):
     isEnroll: bool = True
@@ -167,23 +166,5 @@ def call_internalgemini(
     last_doc_ref.update({"checklist": og_checklist})
     last_doc_ref.update({"createdAt": firestore.SERVER_TIMESTAMP})
 
-
-
-    # doc_ref = collection_ref.document()
-    # checklist_data = {"email":email, "checklist": og_checklist}
-    # checklist_data["createdAt"] = firestore.SERVER_TIMESTAMP
-    
-    # doc_ref.set(checklist_data)
     print("done!")
     return {"message": "Document added successfully"}
-    # insert_stmt = "INSERT INTO checklist_table (value) VALUES (?)"
-    # data_json = json.dumps(og_checklist)
-    # cursor.execute(insert_stmt, (data_json, ))
-    # conn.commit()
-
-    # cache = await get_cache()
-    # cache["calculated_data"] = og_checklist
-    # print(cache.get("calculated_data"))
-    # output = model.generate_actual_checklist(og_checklist, school)
-
-    # return og_checklist

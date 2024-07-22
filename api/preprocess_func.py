@@ -53,15 +53,3 @@ def preprocess(data: dict = Body(...)):
     finalInputData[key] = value
 
   return finalInputData
-
-
-    
-#     inputValueLst.append(value)
-
-
-#   for idx, val in enumerate(inputValueLst):
-#     key = inputDataJSON[idx]
-#     if val == -1:
-#        finalInputData[key] = None
-#     else:
-#         finalInputData[key] = val

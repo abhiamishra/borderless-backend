@@ -3,11 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Body, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-import jwt
 
-from api import callgemini, question
-from api import getdata
-from api import checklist
+from api import question, getdata, checklist
 
 import os
 from dotenv import load_dotenv
@@ -16,13 +13,9 @@ load_dotenv()
 
 from firebase_admin import credentials, initialize_app, firestore, auth
 os.unsetenv("FIREBASE_KEY")
-# print(os.getenv("FIREBASE_KEY"))
+
 private_key = os.getenv("FIREBASE_KEY")
-# print("FIREBASE_PROJECT_ID:", os.getenv("FIREBASE_PROJECT_ID"))
-# print("FIREBASE_PRIVATE_KEY_ID:", os.getenv("FIREBASE_PRIVATE_KEY_ID"))
-# print("FIREBASE_PRIVATE_KEY:", os.getenv("FIREBASE_PRIVATE_KEY"))
-# print("FIREBASE_CLIENT_EMAIL:", os.getenv("FIREBASE_CLIENT_EMAIL"))
-# print("FIREBASE_CLIENT_ID:", os.getenv("FIREBASE_CLIENT_ID"))
+
 try:
     cred = credentials.Certificate({
             "type": "service_account",
@@ -65,28 +58,9 @@ app.add_middleware(
 )
 
 
-app.include_router(callgemini.router)
 app.include_router(getdata.router)
 app.include_router(checklist.router)
 app.include_router(question.router)
-
-
-
-
-# creds = credentials.Certificate("./borderless-asmr-firebase-adminsdk.json")
-
-# Initialize the app with a None auth variable, limiting the server's access
-# firebase_admin.initialize_app(creds)
-# db = firestore.client()
-
-# # The app only has access to public data as defined in the Security Rules
-# # ref = db.reference('/test')
-# collection = db.collection('test').document('MYfL7vSJPmzYCPO6U9HX')
-# data = collection.get().to_dict()
-# print(data)
-# print(ref.get())
-# print(default_app)
-import json
 
 @app.get("/")
 async def root():
