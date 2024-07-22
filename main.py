@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 
-from api import callgemini
+from api import callgemini, question
 from api import getdata
 from api import checklist
 
@@ -14,12 +14,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-import firebase_admin
 from firebase_admin import credentials, initialize_app, firestore, auth
 os.unsetenv("FIREBASE_KEY")
 # print(os.getenv("FIREBASE_KEY"))
 private_key = os.getenv("FIREBASE_KEY")
-# print(private_key)
 # print("FIREBASE_PROJECT_ID:", os.getenv("FIREBASE_PROJECT_ID"))
 # print("FIREBASE_PRIVATE_KEY_ID:", os.getenv("FIREBASE_PRIVATE_KEY_ID"))
 # print("FIREBASE_PRIVATE_KEY:", os.getenv("FIREBASE_PRIVATE_KEY"))
@@ -70,6 +68,8 @@ app.add_middleware(
 app.include_router(callgemini.router)
 app.include_router(getdata.router)
 app.include_router(checklist.router)
+app.include_router(question.router)
+
 
 
 

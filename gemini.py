@@ -43,12 +43,38 @@ class GenModel:
         },
       ]
 
-      system_instruction = "You are an immigration lawyer whose sole task is to help students immigrate to other countries. You are kind, patient, and understand the anxiety of the fears of the student. As such, your responses are thought-out and measured. Your task is to create a checklist of what the student needs to achieve/accomplish:"
+      system_instruction = "You are an immigration lawyer whose sole task is to help students immigrate to other countries. You are kind, patient, and understand the anxiety of the fears of the student. As such, your responses are thought-out and measured."
 
       self.model = genai.GenerativeModel(model_name="gemini-1.5-pro-latest",
                                     generation_config=generation_config,
                                     system_instruction=system_instruction)
-      
+    
+    def generate_answer(
+          self,
+          question,
+          document
+    ):
+       prompt_parts = [
+        f'''You will be given various documents with the following format: URL, Question, Context, and Answer. Your job is to utilize these documents ONLY to answer the question and cite your sources by providing the URL from which you got the answer from. Embed the URL as Markdown text within the response.
+          \n
+          Citation should follow format as <END OF SENTENCE>[Source](URL). Put sources before the <PERIOD>.
+          \n.
+          Here are your supporting documents to consider for your answer. You can only use these: {document}
+          \n
+          Your explanation should only explain your selected answer. Do not ramble and hallucinate. Keep your answer length to less than 500 words but more than 150.
+          \n
+          Always end each question by the following: I cannot give certified legal advice and for specific legal issues, always consult a licensed, immigration attorney.
+          \n
+          Answer format should be always be in Markdown with headings.
+          \n
+          Now given the above instructions, please answer the following question: {question} ?: '''
+      ]
+       
+       response = self.model.generate_content(prompt_parts)
+       return response.text
+       
+
+
     def generate_base_checklist(
           self,
           isEnroll,
