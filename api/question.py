@@ -1,4 +1,7 @@
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from firebase_admin import auth
+from firebase_admin import firestore
 from gemini import GenModel
 from googlesearch import search
 import asyncpraw
@@ -11,10 +14,26 @@ load_dotenv(dotenv_path=env_file_path)
 
 model = GenModel()
 router = APIRouter()
+security = HTTPBearer()
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    try:
+        decoded_token = auth.verify_id_token(token)
+        return decoded_token
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+    
+# Dependency to get the Firestore client
+def get_db():
+    return firestore.client()
+
 
 
 @router.post("/question")
-async def get_answer(data: dict = Body(...)):
+async def get_answer(data: dict = Body(...),
+                     db: firestore.Client = Depends(get_db),
+                   current_user: dict = Depends(get_current_user)):
     question = data["question"]
     query = f"{question} immigration reddit"
     listUrls = list(search(query, num=20, stop=5))

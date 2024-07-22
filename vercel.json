@@ -7,9 +7,9 @@
     }
   ],
   "routes": [
-    { "src": "main.py"},
-    { "src": "checklist.py"},
-    { "src": "getdata.py"},
-    { "src": "question.py"}
+    {
+      "src": "/(.*)",
+      "dest": "main.py"
+    }
   ]
 }
