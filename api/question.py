@@ -21,7 +21,7 @@ async def get_answer(data: dict = Body(...)):
 
     print(env_file_path)
     user_agt = os.environ.get("USR_AGT")
-    print(user_agt)
+    # print(user_agt)
 
     reddit = asyncpraw.Reddit(
         client_id=os.getenv("PRAW_CID"),
@@ -47,13 +47,13 @@ async def get_answer(data: dict = Body(...)):
                 doc += f"Context: {submission.selftext}"
                 doc += "\n"
 
-                print("This is a link-post:")
-                print(f"Linked URL: {submission.url}")
-                print(f"Title of the linked content: {submission.title}")
+                # print("This is a link-post:")
+                # print(f"Linked URL: {submission.url}")
+                # print(f"Title of the linked content: {submission.title}")
                 # print(f"Content: {submission.selftext}")
                 # # Combine all top-level comments into a single string
                 # Combine all top-level comments into a single string
-                print("Onto Comments!")
+                # print("Onto Comments!")
                 await submission.comments.replace_more(limit=0)
 
                 top_comments = sorted(submission.comments, key=lambda comment: comment.score, reverse=True)[:5]
@@ -62,7 +62,7 @@ async def get_answer(data: dict = Body(...)):
                 for comment in top_comments:
                     all_top_level_comments += comment.body + "\n\n"
                 all_top_level_comments = all_top_level_comments.strip()
-                print(all_top_level_comments) 
+                # print(all_top_level_comments) 
                 
                 doc += f"Answer: {all_top_level_comments}"
             
@@ -76,7 +76,7 @@ async def get_answer(data: dict = Body(...)):
     
     combined_doc_string = "\n\n--NEXT DOCUMENT--\n\n".join(doc_list)
 
-    print("generating:")
+    # print("generating:")
     result = model.generate_answer(question, combined_doc_string)
-    print(result)
+    # print(result)
     return result
