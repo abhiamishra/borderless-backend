@@ -7,9 +7,9 @@
     }
   ],
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "main.py"
-    }
+    { "src": "main.py","type": "serverless"},
+    { "src": "checklist.py","type": "serverless"},
+    { "src": "getdata.py","type": "serverless"},
+    { "src": "question.py","type": "serverless"}
   ]
 }
