@@ -57,9 +57,9 @@ class GenModel:
        prompt_parts = [
         f'''You will be given various documents with the following format: URL, Question, Context, and Answer. Your job is to utilize these documents ONLY to answer the question and cite your sources by providing the URL from which you got the answer from. Embed the URL as Markdown text within the response.
           \n
-          Citation should follow format as <END OF SENTENCE>[Source](URL). Put sources before the <PERIOD>.
+          Citation should follow format as <END OF SENTENCE>[Source](URL). Put sources before the <PERIOD>. 
           \n.
-          Here are your supporting documents to consider for your answer. You can only use these: {document}
+          Here are your supporting documents to consider for your answer. You can only use these: {document}. Always cite documents used.
           \n
           Your explanation should only explain your selected answer. Do not ramble and hallucinate. Keep your answer length to less than 500 words but more than 150.
           \n

@@ -1,3 +1,5 @@
+import asyncio
+import aiohttp
 from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from firebase_admin import auth
@@ -16,6 +18,20 @@ model = GenModel()
 router = APIRouter()
 security = HTTPBearer()
 
+# Global aiohttp ClientSession
+client_session = None
+
+@router.on_event("startup")
+async def startup_event():
+    global client_session
+    client_session = aiohttp.ClientSession()
+
+@router.on_event("shutdown")
+async def shutdown_event():
+    global client_session
+    if client_session:
+        await client_session.close()
+
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
     try:
@@ -28,7 +44,24 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 def get_db():
     return firestore.client()
 
-
+async def fetch_reddit_content(reddit, url):
+    try:
+        submission = await reddit.submission(url=url)
+        await submission.comments.replace_more(limit=0)
+        top_comments = sorted(submission.comments, key=lambda comment: comment.score, reverse=True)[:5]
+        doc = ""
+        if submission.selftext:
+            doc += f"Linked URL: {submission.url}\n\n\n"
+            doc += f"Question : {submission.title}\n"
+            doc += f"Context: {submission.selftext}\n"
+            
+            all_top_level_comments = "\n\n".join([comment.body for comment in top_comments])
+            doc += f"Answer: {all_top_level_comments}"
+        
+        return doc
+    except Exception as e:
+        print(f"Error processing submission: {str(e)}")
+        return None
 
 @router.post("/question")
 async def get_answer(data: dict = Body(...),
@@ -37,6 +70,7 @@ async def get_answer(data: dict = Body(...),
     question = data["question"]
     query = f"{question} immigration reddit"
     listUrls = list(search(query, num=20, stop=3))
+    print(listUrls)
 
     print(env_file_path)
     user_agt = os.environ.get("USR_AGT")
@@ -48,48 +82,11 @@ async def get_answer(data: dict = Body(...),
         user_agent=user_agt
     )
 
-    doc_list =[]
-    for url in listUrls:
-        try:
-            submission = await reddit.submission(url=url)
-        except:
-            print("Not valid URL")
-        
-        try:
-            doc = ""
-            # Check if it's a link-post (no selftext)
-            if submission.selftext:
-                doc += f"Linked URL: {submission.url}"
-                doc += "\n\n\n"
-                doc += f"Question : {submission.title}"
-                doc += "\n"
-                doc += f"Context: {submission.selftext}"
-                doc += "\n"
-
-                # print("This is a link-post:")
-                # print(f"Linked URL: {submission.url}")
-                # print(f"Title of the linked content: {submission.title}")
-                # print(f"Content: {submission.selftext}")
-                # # Combine all top-level comments into a single string
-                # Combine all top-level comments into a single string
-                # print("Onto Comments!")
-                await submission.comments.replace_more(limit=0)
-
-                top_comments = sorted(submission.comments, key=lambda comment: comment.score, reverse=True)[:5]
-
-                all_top_level_comments = ""
-                for comment in top_comments:
-                    all_top_level_comments += comment.body + "\n\n"
-                all_top_level_comments = all_top_level_comments.strip()
-                # print(all_top_level_comments) 
-                
-                doc += f"Answer: {all_top_level_comments}"
-            
-            doc_list.append(doc)
-        except:
-            print("Error in processing comments!")
+    doc_list = await asyncio.gather(*[fetch_reddit_content(reddit, url) for url in listUrls])
+    doc_list = [doc for doc in doc_list if doc]
         
     print("doc retrieval done")
+    print(len(doc_list))
     if len(doc_list) == 0:
         return "Query too complex. Try breaking it down and asking it!"
     
