@@ -84,9 +84,9 @@ def checklist(data: dict = Body(...),
   """
   finalInputData = preprocess(data)
   # json_string = json.dumps(data)
-  print(data)
-  print("------------> TRANSFORMED")
-  print(finalInputData)
+#   print(data)
+#   print("------------> TRANSFORMED")
+#   print(finalInputData)
   output = call_internalgemini(
       db,
     isEnroll=finalInputData["isEnroll"],
