@@ -36,7 +36,7 @@ async def get_answer(data: dict = Body(...),
                    current_user: dict = Depends(get_current_user)):
     question = data["question"]
     query = f"{question} immigration reddit"
-    listUrls = list(search(query, num=20, stop=5))
+    listUrls = list(search(query, num=20, stop=3))
 
     print(env_file_path)
     user_agt = os.environ.get("USR_AGT")
