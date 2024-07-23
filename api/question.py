@@ -63,13 +63,52 @@ async def fetch_reddit_content(reddit, url):
         print(f"Error processing submission: {str(e)}")
         return None
 
+import aiohttp
+import asyncio
+
+async def search_with_cse(query, api_key, cse_id, num_links=3):
+    """
+    Makes an asynchronous Google Custom Search API request and returns the top `num_links` results.
+
+    Args:
+    query: The search query string.
+    api_key: Your Google Custom Search API key.
+    cse_id: Your Custom Search Engine ID.
+    num_links: The number of top links to return (default: 3).
+
+    Returns:
+    A list containing the top `num_links` search results or an error message.
+    """
+    url = "https://www.googleapis.com/customsearch/v1"
+    params = {
+        "key": api_key,
+        "cx": cse_id,
+        "q": query
+    }
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, params=params) as response:
+                if response.status != 200:
+                    return f"Error: HTTP {response.status}"
+                
+                results = await response.json()
+                links = [item["link"] for item in results.get("items", [])][:num_links]
+                return links
+    except aiohttp.ClientError as e:
+        return f"Error: {e}"
+
 @router.post("/question")
 async def get_answer(data: dict = Body(...),
                      db: firestore.Client = Depends(get_db),
                    current_user: dict = Depends(get_current_user)):
     question = data["question"]
     query = f"{question} immigration reddit"
-    listUrls = list(search(query, num=20, stop=3))
+    print(query)
+    api_key = os.getenv("GOOGLE_SEARCH_KEY")
+    cse_id = os.getenv("GOOGLE_SEARCH_ID")
+    # listUrls = list(search(query, num=20, stop=3))
+    listUrls = await search_with_cse(query, api_key, cse_id, num_links=3)
     print(listUrls)
 
     print(env_file_path)

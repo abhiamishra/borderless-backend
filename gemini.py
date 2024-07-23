@@ -65,7 +65,7 @@ class GenModel:
           \n
           Always end each question by the following: I cannot give certified legal advice and for specific legal issues, always consult a licensed, immigration attorney.
           \n
-          Answer format should be always be in Markdown with headings.
+          Answer format should be always be in Markdown with headings. Always include sources.
           \n
           Now given the above instructions, please answer the following question: {question} ?: '''
       ]
